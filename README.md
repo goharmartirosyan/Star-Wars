@@ -1,4 +1,4 @@
-#Star War Characters 
+# Star War Characters 
 This script allows you to explore characters from the Star Wars universe. You can search for a character by name or browse the list of characters. For more detailed information, click the "View Details" button to navigate to a page with additional data, such as films and species.
 
 #Feateures
