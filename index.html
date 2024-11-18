@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars Characters</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+            .search-container input {
+                width: 60%;
+                padding: 10px;
+                font-size: 16px;
+            }
+
+        .character-list {
+            max-width: 800px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+        }
+
+        .character-item {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .character-item button {
+                padding: 5px 10px;
+                font-size: 14px;
+                color: #fff;
+                background-color: #007BFF;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+
+                .character-item button:hover {
+                    background-color: #0056b3;
+                }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                padding: 10px 20px;
+                margin: 5px;
+                font-size: 14px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #fff;
+                cursor: pointer;
+            }
+
+                .pagination button:disabled {
+                    background-color: #eee;
+                    cursor: not-allowed;
+                }
+
+                .pagination button:hover:enabled {
+                    background-color: #007BFF;
+                    color: #fff;
+                }
+    </style>
+</head>
+<body>
+    <h1>Star Wars Characters</h1>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search for a character...">
+    </div>
+    <ul class="character-list" id="character-list">
+    </ul>
+    <div class="pagination">
+        <button id="prev-btn" disabled>Previous</button>
+        <button id="next-btn" disabled>Next</button>
+    </div>
+
+    <script>
+        const apiUrl = "https://swapi.dev/api/people/";
+        let currentPageUrl = apiUrl;
+        let characters = [];
+
+        const characterList = document.getElementById("character-list");
+        const searchInput = document.getElementById("search");
+        const prevBtn = document.getElementById("prev-btn");
+        const nextBtn = document.getElementById("next-btn");
+
+        async function fetchCharacters(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                characters = data.results;
+                displayCharacters(characters);
+                prevBtn.disabled = !data.previous;
+                nextBtn.disabled = !data.next;
+                prevBtn.onclick = () => fetchCharacters(data.previous);
+                nextBtn.onclick = () => fetchCharacters(data.next);
+            } catch (error) {
+                console.error("Error fetching characters:", error);
+            }
+        }
+
+        async function displayCharacters(characters) {
+            characterList.innerHTML = "";
+
+            for (const character of characters) {
+                const listItem = document.createElement("li");
+                listItem.classList.add("character-item");
+
+                listItem.innerHTML = `
+            <span>
+                ${character.name} - Birth Year: ${character.birth_year}
+            </span>
+            <button onclick="viewDetails('${character.url}')">View Details</button>
+        `;
+
+                characterList.appendChild(listItem);
+            }
+        }
+
+        async function viewDetails(characterUrl) {
+            try {
+                const response = await fetch(characterUrl);
+                const character = await response.json();
+                const films = await fetchDetails(character.films);
+                const species = await fetchDetails(character.species);
+
+                const characterData = {
+                    name: character.name,
+                    gender: character.gender,
+                    birthYear: character.birth_year,
+                    films,
+                    species,
+                };
+
+                localStorage.setItem("characterDetails", JSON.stringify(characterData));
+                window.location.href = "details.html";
+            } catch (error) {
+                console.error("Error fetching character details:", error);
+            }
+        }
+
+        async function fetchDetails(urls) {
+            if (!urls || urls.length === 0) return [];
+            const promises = urls.map((url) => fetch(url).then((res) => res.json()));
+            const results = await Promise.all(promises);
+            return results.map((result) => result.title || result.name); 
+        }
+
+        searchInput.addEventListener("input", (e) => {
+            const searchQuery = e.target.value.toLowerCase();
+            const filteredCharacters = characters.filter((character) =>
+                character.name.toLowerCase().includes(searchQuery)
+            );
+            displayCharacters(filteredCharacters);
+        });
+
+        fetchCharacters(currentPageUrl);
+
+    </script>
+</body>
+</html>

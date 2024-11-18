@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            color: #555;
+            font-size: 1.2em;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+            ul li {
+                background: #f9f9f9;
+                padding: 10px;
+                margin-bottom: 5px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                color: #444;
+            }
+
+        #films-list,
+        #species-list {
+            display: none; /* hidden */
+        }
+
+        .back-button {
+            background-color: #6c757d;
+        }
+
+            .back-button:hover {
+                background-color: #5a6268;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="character-name"></h1>
+        <p id="character-gender"></p>
+        <p id="character-birth-year"></p>
+
+        <button id="films-button">Show Films</button>
+        <ul id="films-list"></ul>
+
+        <button id="species-button">Show Species</button>
+        <ul id="species-list"></ul>
+
+        <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+
+    <script>
+        
+        const characterDetails = JSON.parse(localStorage.getItem("characterDetails"));
+
+        if (characterDetails) {
+           
+            document.getElementById("character-name").textContent = characterDetails.name;
+            document.getElementById("character-gender").textContent = `Gender: ${characterDetails.gender}`;
+            document.getElementById("character-birth-year").textContent = `Birth Year: ${characterDetails.birthYear}`;
+            document.getElementById("films-button").addEventListener("click", () => {
+                displayList("films-list", characterDetails.films, "Films");
+            });
+
+            document.getElementById("species-button").addEventListener("click", () => {
+                displayList("species-list", characterDetails.species, "Species");
+            });
+        } else {
+            document.body.innerHTML = "<p>Character details not found.</p>";
+        }
+
+        function displayList(listId, items, type) {
+            const listElement = document.getElementById(listId);
+            listElement.innerHTML = "";
+            if (!items || items.length === 0) {
+                alert(`No ${type} data available.`);
+                return;
+            }
+            listElement.style.display = "block";
+
+            items.forEach((item) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = item;
+                listElement.appendChild(listItem);
+            });
+        }
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
